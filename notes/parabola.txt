@@ -1,0 +1,25 @@
+This is the parabola that the ball follows when shooting the ball.
+y = -force*x^2 + 2*x + 1
+The "force" is just a parameter of the parabola, not a real force.
+
+The scale is the "z" position, represented as the scale of the ball when drawing it.
+It starts at 1 because that's the original scale of the texture.
+
+The idea is to check when the "z" position gets to 1 after being shot (see the graphic), in which case the ball bounced:
+When y = 1, we can calculate the x value (ball$i) with the quadratic formula, and since the number of steps that the parabola moves is fixed (0.01), we can calculate how many iterations (of the movement of the ball) it would take the ball to bounce:
+
+parabola_at_one = (2 / force) -> This is the quadratic formula simplified when y = 1
+num_iterations = ceil(parabola_at_one / 0.01) + 1
+
+We need to know that number to calculate where the ball is going to bounce given the "force" of the parabola. We can do this because the movement of the ball is fixed:
+
+ball_x <- ball-x + ball_speed * cos(ball_angle)
+ball_y <- ball_y + ball_speed * sin(ball_angle)
+
+The speed and angle are constants. We already know how many times this would need to be repeated until it gets to the bouncing positiong (num_iterations), so to get the x-y position of where the ball is going to bounce:
+
+bounce_x <- origin_x + (ball_speed * cos(angle)) * num_iterations
+bounce_y <- origin_y + (ball_speed * sin(angle)) * num_iterations
+
+Simply multiply the fixed movement of the ball "num_iterations" times, which is where we initially considered is the ball bouncing.
+origin_x and origin_y is where the ball started the movement. When the ball bounces for the first time, the origin is now the position where the ball bounced. We can repeat this pattern until the ball goes off the screen, making the parabola to be "shorter" by increasing the "force".
