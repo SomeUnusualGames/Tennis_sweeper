@@ -6,7 +6,8 @@ init_ball <- function() {
       origin_x = 0.0, origin_y = 0.0,  # Fixed position where the ball lands
       bounce_x = 0.0, bounce_y = 0.0,  # Current bounce position
       x = 300.0, y = 10.0, z = 1.0,    # Current position and scale
-      angle = 0.0, force = 0.0,
+      direction_angle = 0.0, force = 0.0,
+      texture_angle = 0.0,
       speed = 0.0, i = 0.0,
       bounced_once = FALSE, bounced_twice = FALSE
     )
@@ -15,7 +16,7 @@ init_ball <- function() {
 
 shoot_ball <- function(ball, angle, force, initial_x, initial_y, reset=FALSE) {
   ball$speed <- 10.0
-  ball$angle <- angle
+  ball$direction_angle <- angle
   ball$force <- force
   ball$x <- initial_x
   ball$y <- initial_y
@@ -43,18 +44,17 @@ is_ball_offscreen <- function(ball) {
 
 update_ball <- function(ball) {
   if (!is_ball_offscreen(ball) && ball$speed > 0) {
-    ball$x <- ball$x + ball$speed * cos(deg2rad(ball$angle))
-    ball$y <- ball$y + ball$speed * sin(deg2rad(ball$angle))
+    ball$x <- ball$x + ball$speed * cos(deg2rad(ball$direction_angle))
+    ball$y <- ball$y + ball$speed * sin(deg2rad(ball$direction_angle))
     ball$z <- -ball$force * ball$i^2 + 2 * ball$i + 1
     ball$i <- ball$i + 0.01
     if (ball$z < 1) {
       if (!ball$bounced_once){
         ball$bounced_once <- TRUE
-        ball <- shoot_ball(ball, ball$angle, ball$force*2, ball$x, ball$y)
+        ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y)
       } else {
-        ball <- shoot_ball(ball, ball$angle, ball$force*2, ball$x, ball$y)
+        ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y)
         ball$bounced_twice <- TRUE
-        #ball$speed <- 0.0
       }
     }
   } else {
@@ -65,7 +65,7 @@ update_ball <- function(ball) {
 }
 
 draw_ball <- function(ball) {
-  draw_circle_v(c(ball$x+3, ball$y+3), 3.0, "black")
+  #draw_circle_v(c(ball$x+3, ball$y+3), 3.0, "black")
   draw_texture_ex(ball$texture, c(ball$x, ball$y), 0.0, ball$z, "white")
   if (ball$speed > 0) {
     # Simplifying the quadratic formula taking: a = -ball$force, b = 2, c = 0 (see equation for ball$z)
@@ -78,8 +78,8 @@ draw_ball <- function(ball) {
     # that are added to the position of the ball every frame, so to know
     # where the ball is going to land we add the initial position + that constant times
     # the total step count
-    ball$bounce_x <- ball$origin_x + (ball$speed * cos(deg2rad(ball$angle))) * step_count
-    ball$bounce_y <- ball$origin_y + (ball$speed * sin(deg2rad(ball$angle))) * step_count
+    ball$bounce_x <- ball$origin_x + (ball$speed * cos(deg2rad(ball$direction_angle))) * step_count
+    ball$bounce_y <- ball$origin_y + (ball$speed * sin(deg2rad(ball$direction_angle))) * step_count
     draw_circle_v(c(ball$bounce_x+7, ball$bounce_y+7), 5.0, "yellow")
   }
   return(ball)

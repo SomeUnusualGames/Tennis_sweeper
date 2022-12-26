@@ -3,8 +3,10 @@ library(enumerations)
 source("game.r")
 
 # TODO: Player hitting the ball
+# Define a couple of areas (squares) that the player can reach
+# if the ball isn't in that area, don't trigger the hit animation
 
-game <- init_game(640, 700, "Unusual Tennis")
+game <- init_game(640, 700, "Tennis Sweeper")
 
 while (!window_should_close()) {
   game <- update_game(game)

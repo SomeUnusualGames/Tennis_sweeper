@@ -1,4 +1,7 @@
-ANIMATION_ID <- create.enum(c("1", "2", "3"), c("IDLE", "SERVE", "NONE"))
+ANIMATION_ID <- create.enum(
+  c("1", "2", "3", "4", "5", "6"),
+  c("IDLE", "HIGHBALL", "HIT", "HIT_REV", "MOVE", "NONE")
+)
 
 init_animation <- function(texture_path) {
   return (
@@ -24,13 +27,15 @@ load_animation <- function(animation, id, rect_texture, frame_size, delay_betwee
 }
 
 set_animation <- function(animation, id) {
-  animation$current_id <- id
-  animation$current_frame <- rectangle(
-    animation[[id]]$rect_texture$x, animation[[id]]$rect_texture$y,
-    animation[[id]]$frame_size[1], animation[[id]]$frame_size[2]
-  )
-  animation$delay_index <- 1
-  animation$current_delay <- animation[[id]]$delay_between_frames[1]
+  if (animation$current_id != id) {
+    animation$current_id <- id
+    animation$current_frame <- rectangle(
+      animation[[id]]$rect_texture$x, animation[[id]]$rect_texture$y,
+      animation[[id]]$frame_size[1], animation[[id]]$frame_size[2]
+    )
+    animation$delay_index <- 1
+    animation$current_delay <- animation[[id]]$delay_between_frames[1]
+  }
   return(animation)
 }
 
@@ -49,7 +54,7 @@ update_animation <- function(animation) {
       animation$current_frame$y <- current_anim$rect_texture$y
     } else {
       if (animation$current_frame$x + animation$current_frame$width < current_anim$rect_texture$width) {
-        animation$current_frame$x <- animation$current_frame$x + animation$current_frame$width
+        animation$current_frame$x <- animation$current_frame$x + abs(animation$current_frame$width)
       } else {
         animation$current_frame$x <- current_anim$rect_texture$x
       }
@@ -69,7 +74,7 @@ draw_animation <- function(animation, x, y, scale, angle, color) {
   draw_texture_pro(
     animation$texture,
     current_frame,
-    rectangle(x, y, current_frame$width*scale, current_frame$height*scale),
+    rectangle(x, y, abs(current_frame$width)*scale, current_frame$height*scale),
     c(current_frame$width %/% 2, current_frame$height %/% 2),
     angle,
     color
