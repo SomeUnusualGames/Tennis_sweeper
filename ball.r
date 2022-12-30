@@ -7,15 +7,15 @@ init_ball <- function() {
       bounce_x = 0.0, bounce_y = 0.0,  # Current bounce position
       x = 300.0, y = 10.0, z = 1.0,    # Current position and scale
       direction_angle = 0.0, force = 0.0,
-      texture_angle = 0.0,
-      speed = 0.0, i = 0.0,
-      bounced_once = FALSE, bounced_twice = FALSE
+      texture_angle = 0.0, speed = 0.0, i = 0.0,
+      bounced_once = FALSE, bounced_twice = FALSE,
+      movement_points = array(list(list(x = 300.0, y=10.0)))
     )
   )
 }
 
-shoot_ball <- function(ball, angle, force, initial_x, initial_y, reset=FALSE) {
-  ball$speed <- 10.0
+shoot_ball <- function(ball, angle, force, initial_x, initial_y, speed, reset=FALSE, hit=FALSE) {
+  ball$speed <- speed
   ball$direction_angle <- angle
   ball$force <- force
   ball$x <- initial_x
@@ -32,8 +32,23 @@ shoot_ball <- function(ball, angle, force, initial_x, initial_y, reset=FALSE) {
   if (reset) {
     ball$bounced_once <- FALSE
     ball$bounced_twice <- FALSE
-    ball$origin_x <- ball$spawn_x
-    ball$origin_y <- ball$spawn_y
+    if (hit) {
+      ball$origin_x <- initial_x
+      ball$origin_y <- initial_y
+    } else {
+      ball$origin_x <- ball$spawn_x
+      ball$origin_y <- ball$spawn_y
+    }
+  }
+  if (length(ball$movement_points) == 1) {
+    x <- ball$origin_x + (ball$speed * cos(deg2rad(ball$direction_angle-1))) * 25
+    y <- ball$origin_y + (ball$speed * sin(deg2rad(ball$direction_angle-1))) * 25
+    #ball$movement_points <- array(list(list(x = 300.0, y=10.0)))
+    for (i in 1:45) {
+      x <- x + ball$speed * cos(deg2rad(ball$direction_angle-1)) #x_mov
+      y <- y + ball$speed * sin(deg2rad(ball$direction_angle-1)) #y_mov
+      ball$movement_points <- append(ball$movement_points, list(list(x=x, y=y)))
+    }
   }
   return(ball)
 }
@@ -43,7 +58,7 @@ is_ball_offscreen <- function(ball) {
 }
 
 update_ball <- function(ball) {
-  if (!is_ball_offscreen(ball) && ball$speed > 0) {
+  if (!is_ball_offscreen(ball) && ball$speed != 0) {
     ball$x <- ball$x + ball$speed * cos(deg2rad(ball$direction_angle))
     ball$y <- ball$y + ball$speed * sin(deg2rad(ball$direction_angle))
     ball$z <- -ball$force * ball$i^2 + 2 * ball$i + 1
@@ -51,14 +66,15 @@ update_ball <- function(ball) {
     if (ball$z < 1) {
       if (!ball$bounced_once){
         ball$bounced_once <- TRUE
-        ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y)
+        ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y, ball$speed)
       } else {
-        ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y)
+        ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y, ball$speed)
         ball$bounced_twice <- TRUE
       }
     }
   } else {
     ball <- shoot_ball(game$ball, rand(75, 105), rand(3, 5), 300.0, 10.0, TRUE)
+    ball$movement_points <- array(list(list(x = 300.0, y=10.0)))
     ball$speed <- 0.0
   }
   return(ball)
@@ -67,7 +83,7 @@ update_ball <- function(ball) {
 draw_ball <- function(ball) {
   #draw_circle_v(c(ball$x+3, ball$y+3), 3.0, "black")
   draw_texture_ex(ball$texture, c(ball$x, ball$y), 0.0, ball$z, "white")
-  if (ball$speed > 0) {
+  if (ball$speed != 0) {
     # Simplifying the quadratic formula taking: a = -ball$force, b = 2, c = 0 (see equation for ball$z)
     # c is not 1 because we want to check when the parabola is at y = 1 (the original scale of the ball)
     parabola_end <- (2 / ball$force)
@@ -81,6 +97,13 @@ draw_ball <- function(ball) {
     ball$bounce_x <- ball$origin_x + (ball$speed * cos(deg2rad(ball$direction_angle))) * step_count
     ball$bounce_y <- ball$origin_y + (ball$speed * sin(deg2rad(ball$direction_angle))) * step_count
     draw_circle_v(c(ball$bounce_x+7, ball$bounce_y+7), 5.0, "yellow")
+    #for (point in ball$movement_points) {
+    #  draw_pixel_v(c(point$x, point$y), "red")
+    #}
   }
   return(ball)
+}
+
+unload_ball <- function(ball) {
+  unload_texture(ball$texture)
 }

@@ -1,14 +1,16 @@
 # Constants
 SQRT2 <- sqrt(2)
-NORMAL_BALL <- key$n
-HIGH_BALL <- key$m
+
+BALL_STATE <- create.enum(
+  c("1", "2", "3"),
+  c("WAIT_BALL", "HIT_BALL", "NONE")
+)
 
 init_player <- function() {
   player <- list(
     animation = init_animation("assets/graphics/rumi.png"),
     position = c(x = 175, y = 600),
-    speed = 220,
-    can_move = TRUE
+    speed = 220, can_move = TRUE, ball_state = BALL_STATE$NONE
   )
   player$animation <- load_animation(
     player$animation,
@@ -24,7 +26,7 @@ init_player <- function() {
   player$animation <- load_animation(
     player$animation,
     ANIMATION_ID$HIT,
-    rectangle(0, 80, 155, 27), c(31, 27), c(0.1, 0.03, 0.03, 0.05, 0.1),
+    rectangle(0, 80, 155, 27), c(31, 27), c(0.1, 0.01, 0.01, 0.05, 0.1),
     TRUE, ANIMATION_ID$IDLE
   )
   player$animation <- load_animation(
@@ -88,13 +90,50 @@ player_is_hitting <- function(curr_id) {
   return(curr_id == ANIMATION_ID$HIT || curr_id == ANIMATION_ID$HIGHBALL || curr_id == ANIMATION_ID$HIT_REV)
 }
 
-update_player <- function(state, player) {
+update_player <- function(state, player, ball) {
   player$animation <- update_animation(player$animation)
-  player$can_move <- !player_is_hitting(player$animation$current_id)
+
+  if (!player_is_hitting(player$animation$current_id)) {
+    player$can_move <- TRUE
+  }
+
+  if (is_key_pressed(key$space) && length(ball$movement_points) > 1 && player$ball_state == BALL_STATE$NONE && ball$y < player$position[2]-50) {
+    player_rect <- rectangle(player$position[1]-10, player$position[2]-50, 65, 44)
+    found_point <- FALSE
+    for (point in ball$movement_points) {
+      if (check_collision_point_rec(c(point$x, point$y), player_rect)) {
+        if (!found_point) {
+          found_point <- TRUE
+        } else {
+          # Check what animation to play here and where is the player going to shoot
+          player$can_move <- FALSE
+          player$animation <- set_animation(player$animation, ANIMATION_ID$HIT)
+          player$animation$paused <- TRUE
+          player$ball_state <- BALL_STATE$WAIT_BALL
+          break
+        }
+      }
+    }
+  }
+
+  if (player$ball_state == BALL_STATE$WAIT_BALL) {
+    ball_collision <- check_collision_recs(
+      rectangle(ball$x, ball$y, 10, 10),
+      rectangle(player$position[1]-10, player$position[2]-50, 65, 24)
+    )
+    if (ball_collision) {
+      player$animation$paused <- FALSE
+      player$ball_state <- BALL_STATE$NONE
+      ball$movement_points <- array(list(list(x = ball$x, y=ball$y)))
+      ball <- shoot_ball(ball, rand(75, 105), 4.5, ball$x, ball$y, -10.0, TRUE, TRUE)
+    }
+  }
+
+  #player$can_move <- !player_is_hitting(player$animation$current_id)
   if (player$can_move) {
     player <- player_movement(player)
   }
-  return(player)
+  return(list(p=player, b=ball))
 }
 
 draw_player <- function(state, player) {

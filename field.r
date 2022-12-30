@@ -7,7 +7,7 @@ init_field <- function() {
   )
   for (x in 1:field$width) {
     for (y in 1:field$height) {
-      field$mineList[[x, y]]$rect <- rectangle(160+(x*32)+(x*5), 25+(y*32)+(y*5), 32, 32)
+      field$mineList[[x, y]]$rect <- rectangle(160+(x*32)+(x*5), 35+(y*32)+(y*5), 32, 32)
     }
   }
   return(field)

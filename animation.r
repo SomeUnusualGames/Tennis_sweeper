@@ -10,7 +10,8 @@ init_animation <- function(texture_path) {
       current_frame = rectangle(0, 0, 0, 0),
       current_id = ANIMATION_ID$NONE,
       current_delay = 0.0,
-      delay_index = 1
+      delay_index = 1,
+      paused = FALSE
     )
   )
 }
@@ -40,6 +41,9 @@ set_animation <- function(animation, id) {
 }
 
 update_animation <- function(animation) {
+  if (animation$paused) {
+    return(animation)
+  }
   current_anim <- animation[[animation$current_id]]
   animation$current_delay <- animation$current_delay - get_frame_time()
   if (animation$current_delay <= 0) {
