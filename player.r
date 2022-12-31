@@ -32,7 +32,7 @@ init_player <- function() {
   player$animation <- load_animation(
     player$animation,
     ANIMATION_ID$HIT_REV,
-    rectangle(0, 80, 155, 27), c(-31, 27), c(0.1, 0.03, 0.03, 0.05, 0.1),
+    rectangle(0, 80, 155, 27), c(-31, 27), c(0.1, 0.01, 0.01, 0.05, 0.1),
     TRUE, ANIMATION_ID$IDLE
   )
   player$animation <- load_animation(
@@ -90,7 +90,7 @@ player_is_hitting <- function(curr_id) {
   return(curr_id == ANIMATION_ID$HIT || curr_id == ANIMATION_ID$HIGHBALL || curr_id == ANIMATION_ID$HIT_REV)
 }
 
-update_player <- function(state, player, ball, ball_pointer) {
+update_player <- function(state, player, ball, b_pointer) {
   player$animation <- update_animation(player$animation)
 
   if (!player_is_hitting(player$animation$current_id)) {
@@ -99,19 +99,27 @@ update_player <- function(state, player, ball, ball_pointer) {
 
   if (is_key_pressed(key$space) && length(ball$movement_points) > 1 && player$ball_state == BALL_STATE$NONE && ball$y < player$position[2]-50) {
     player_rect <- rectangle(player$position[1]-10, player$position[2]-50, 65, 44)
-    found_point <- FALSE
     for (point in ball$movement_points) {
       if (check_collision_point_rec(c(point$x, point$y), player_rect)) {
-        if (!found_point) {
-          found_point <- TRUE
-        } else {
-          # Check what animation to play here
-          player$can_move <- FALSE
+        player$can_move <- FALSE
+        angle <- 180 + get_angle(
+          player$position[1], player$position[2],
+          b_pointer$position[1], b_pointer$position[2]
+        )
+        dist <- get_distance(
+          player$position[1], player$position[2],
+          ball$x, ball$y
+        )
+        if (dist < 100 && ball$z > 1.1) {
+          player$animation <- set_animation(player$animation, ANIMATION_ID$HIGHBALL)
+        } else if (angle >= 0) {
           player$animation <- set_animation(player$animation, ANIMATION_ID$HIT)
-          player$animation$paused <- TRUE
-          player$ball_state <- BALL_STATE$WAIT_BALL
-          break
+        } else {
+          player$animation <- set_animation(player$animation, ANIMATION_ID$HIT_REV)
         }
+        player$animation$paused <- TRUE
+        player$ball_state <- BALL_STATE$WAIT_BALL
+        break
       }
     }
   }
@@ -127,7 +135,7 @@ update_player <- function(state, player, ball, ball_pointer) {
       ball$movement_points <- array(list(list(x = ball$x, y=ball$y)))
       ball <- shoot_ball_to(
         ball, -10.0, ball$x, ball$y,
-        ball_pointer$position[1], ball_pointer$position[2]
+        b_pointer$position[1], b_pointer$position[2]
       )
     }
   }

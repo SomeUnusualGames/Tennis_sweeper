@@ -25,3 +25,7 @@ lerp <- function(a, b, t) {
 get_angle <- function(x1, y1, x2, y2) {
   return(rad2deg(atan2(y2-y1, x2-x1)))
 }
+
+get_distance <- function(x1, y1, x2, y2) {
+  return(sqrt((x1-x2)^2 + (y1-y2)^2))
+}

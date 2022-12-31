@@ -103,7 +103,7 @@ update_ball <- function(ball) {
       }
     }
   } else {
-    ball <- shoot_ball(game$ball, rand(75, 105), rand(3, 5), 300.0, 10.0, TRUE)
+    ball <- shoot_ball(game$ball, rand(75, 105), rand(3, 5), ball$spawn_x, ball$spawn_y, TRUE)
     ball$movement_points <- array(list(list(x = 300.0, y=10.0)))
     ball$speed <- 0.0
   }

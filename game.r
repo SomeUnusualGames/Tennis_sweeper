@@ -33,7 +33,7 @@ update_game <- function(game) {
 
   game$machine <- update_ball_machine(game$machine)
   if (game$machine$state == MACHINE_STATE$SHOOT) {
-    game$ball <- shoot_ball(game$ball, game$machine$ball_angle, rand(3.2, 5), 300.0, 10.0, 10.0, TRUE)
+    game$ball <- shoot_ball(game$ball, game$machine$ball_angle, rand(3, 5), 300.0, 10.0, 10.0, TRUE)
     game$machine$state <- MACHINE_STATE$WAIT_BALL
   } else if (game$machine$state == MACHINE_STATE$WAIT_BALL && is_ball_offscreen(game$ball)) {
     game$machine$state <- MACHINE_STATE$WAIT_TIMER
