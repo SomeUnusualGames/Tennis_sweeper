@@ -1,6 +1,7 @@
 source("utils.r")
 source("field.r")
 source("animation.r")
+source("ball_pointer.r")
 source("ball.r")
 source("ball_machine.r")
 source("player.r")
@@ -13,15 +14,18 @@ init_game <- function(width, height, title) {
       field   = init_field(),
       player  = init_player(),
       ball    = init_ball(),
-      machine = init_ball_machine()
+      machine = init_ball_machine(),
+      ball_pointer = init_ball_pointer()
     )
   )
 }
 
 update_game <- function(game) {
-  updated_vars <- update_player(game$state, game$player, game$ball)
+  updated_vars <- update_player(game$state, game$player, game$ball, game$ball_pointer)
   game$player <- updated_vars$p
   game$ball <- updated_vars$b
+
+  game$ball_pointer <- update_ball_pointer(game$ball_pointer)
 
   if (game$ball$speed != 0) {
     game$ball <- update_ball(game$ball)
@@ -52,6 +56,7 @@ draw_game <- function(game) {
   draw_player(game$state, game$player)
   game$ball <- draw_ball(game$ball)
   draw_ball_machine(game$machine)
+  draw_ball_pointer(game$ball_pointer)
   #if (length(game$ball$movement_points) > 1) {
   #  points <- game$ball$movement_points
   #  draw_line_v(

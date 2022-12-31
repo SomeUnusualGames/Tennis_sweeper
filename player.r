@@ -9,7 +9,7 @@ BALL_STATE <- create.enum(
 init_player <- function() {
   player <- list(
     animation = init_animation("assets/graphics/rumi.png"),
-    position = c(x = 175, y = 600),
+    position = c(175, 600),
     speed = 220, can_move = TRUE, ball_state = BALL_STATE$NONE
   )
   player$animation <- load_animation(
@@ -51,16 +51,16 @@ player_is_off_limits <- function(x, y, width, height) {
 player_movement <- function(player) {
   dx <- 0
   dy <- 0
-  if (is_key_down(key$w) || is_key_down(key$up)) {
-    dy <- -player$speed #player$position["y"] <- player$position["y"] - player$speed * get_frame_time()
-  } else if (is_key_down(key$s) || is_key_down(key$down)) {
-    dy <- player$speed #player$position["y"] <- player$position["y"] + player$speed * get_frame_time()
+  if (is_key_down(key$w)) {
+    dy <- -player$speed
+  } else if (is_key_down(key$s)) {
+    dy <- player$speed
   }
   
-  if (is_key_down(key$a) || is_key_down(key$left)) {
-    dx <- -player$speed #player$position["x"] <- player$position["x"] - player$speed * get_frame_time()
-  } else if (is_key_down(key$d) || is_key_down(key$right)) {
-    dx <- player$speed #player$position["x"] <- player$position["x"] + player$speed * get_frame_time()
+  if (is_key_down(key$a)) {
+    dx <- -player$speed
+  } else if (is_key_down(key$d)) {
+    dx <- player$speed
   }
   
   if (dx != 0) {
@@ -75,12 +75,12 @@ player_movement <- function(player) {
     player$animation <- set_animation(player$animation, ANIMATION_ID$IDLE)
   }
   
-  new_pos_x <- player$position["x"] + dx * get_frame_time()
-  new_pos_y <- player$position["y"] + dy * get_frame_time()
+  new_pos_x <- player$position[1] + dx * get_frame_time()
+  new_pos_y <- player$position[2] + dy * get_frame_time()
 
   if (!player_is_off_limits(new_pos_x, new_pos_y, 27, 20)) {
-    player$position["x"] <- new_pos_x
-    player$position["y"] <- new_pos_y
+    player$position[1] <- new_pos_x
+    player$position[2] <- new_pos_y
   }
   
   return(player)
@@ -90,7 +90,7 @@ player_is_hitting <- function(curr_id) {
   return(curr_id == ANIMATION_ID$HIT || curr_id == ANIMATION_ID$HIGHBALL || curr_id == ANIMATION_ID$HIT_REV)
 }
 
-update_player <- function(state, player, ball) {
+update_player <- function(state, player, ball, ball_pointer) {
   player$animation <- update_animation(player$animation)
 
   if (!player_is_hitting(player$animation$current_id)) {
@@ -105,7 +105,7 @@ update_player <- function(state, player, ball) {
         if (!found_point) {
           found_point <- TRUE
         } else {
-          # Check what animation to play here and where is the player going to shoot
+          # Check what animation to play here
           player$can_move <- FALSE
           player$animation <- set_animation(player$animation, ANIMATION_ID$HIT)
           player$animation$paused <- TRUE
@@ -125,8 +125,17 @@ update_player <- function(state, player, ball) {
       player$animation$paused <- FALSE
       player$ball_state <- BALL_STATE$NONE
       ball$movement_points <- array(list(list(x = ball$x, y=ball$y)))
-      ball <- shoot_ball(ball, rand(75, 105), 4.5, ball$x, ball$y, -10.0, TRUE, TRUE)
+      ball <- shoot_ball_to(
+        ball, -10.0, ball$x, ball$y,
+        ball_pointer$position[1], ball_pointer$position[2]
+      )
     }
+  }
+
+  if (is_ball_offscreen(ball) && player$ball_state == BALL_STATE$WAIT_BALL) {
+    player$ball_state = BALL_STATE$NONE
+    player$can_move <- TRUE
+    player$animation$paused <- FALSE
   }
 
   #player$can_move <- !player_is_hitting(player$animation$current_id)
@@ -137,7 +146,7 @@ update_player <- function(state, player, ball) {
 }
 
 draw_player <- function(state, player) {
-  draw_animation(player$animation, player$position["x"], player$position["y"], 2.5, 0.0, "white")
+  draw_animation(player$animation, player$position[1], player$position[2], 2.5, 0.0, "white")
   #draw_rectangle_rec(rectangle(player$position["x"], player$position["y"], 60, 60), "white")
 }
 

@@ -1,14 +1,17 @@
 This is the parabola that the ball follows when shooting the ball.
-y = -force*x^2 + 2*x + 1
+z = -force*x^2 + 2*x + 1
 The "force" is just a parameter of the parabola, not a real force.
 
 The scale is the "z" position, represented as the scale of the ball when drawing it.
 It starts at 1 because that's the original scale of the texture.
 
 The idea is to check when the "z" position gets to 1 after being shot (see the graphic), in which case the ball bounced:
-When y = 1, we can calculate the x value (ball$i) with the quadratic formula, and since the number of steps that the parabola moves is fixed (0.01), we can calculate how many iterations (of the movement of the ball) it would take the ball to bounce:
+When z = 1, we can calculate the x value (ball$i) with the quadratic formula, and since the number of steps that the parabola moves is fixed (0.01), we can calculate how many iterations (of the movement of the ball) it would take the ball to bounce:
 
-parabola_at_one = (2 / force) -> This is the quadratic formula simplified when y = 1
+-force*x^2 + 2*x + 1 = 1
+-force*x^2 + 2*x = 0
+force = 2*x -> x = 2 / force
+parabola_at_one = (2 / force) -> This is the quadratic formula simplified when z = 1
 num_iterations = ceil(parabola_at_one / 0.01) + 1
 
 We need to know that number to calculate where the ball is going to bounce given the "force" of the parabola. We can do this because the movement of the ball is fixed:
@@ -23,3 +26,34 @@ bounce_y <- origin_y + (ball_speed * sin(angle)) * num_iterations
 
 Simply multiply the fixed movement of the ball "num_iterations" times, which is where we initially considered is the ball bouncing.
 origin_x and origin_y is where the ball started the movement. When the ball bounces for the first time, the origin is now the position where the ball bounced. We can repeat this pattern until the ball goes off the screen, making the parabola to be "shorter" by increasing the "force".
+
+----------------
+
+Hitting the ball to a specific position:
+
+We already know where the ball will bounce:
+target_x, target_y
+
+We can get the angle easily by using atan2:
+angle = get_angle(player_x, player_y, target_x, target_y)
+
+Now get how many steps does our parabola need to iterate to get to that position:
+i = 0
+for (n in 1:50) {
+  ball_x = ball_x + speed * cos(angle)
+  ball_y = ball_y + speed * sin(angle)
+  i = i + 0.01
+  if (abs(target_x-ball_x)<0.01 && abs(target_y-ball_y)<0.01) {
+    break
+  }
+}
+
+We can calculate the "force" (a) of this parabola easily:
+-a*i^2 + 2*i + 1 = 1
+-a*i^2 + 2*i = 0
+a = 2*i/i^2
+a = 2/i  <---
+
+Or... I simply had to look at the way I get the ending position of the parabola by a given force and switch the variables...
+parabola_end <- 2 / ball$force
+it was actually that simple...
