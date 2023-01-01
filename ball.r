@@ -87,14 +87,34 @@ is_ball_offscreen <- function(ball) {
   return(ball$x < 0 || ball$x > get_screen_width() || ball$y < 0 || ball$y > get_screen_height())
 }
 
-update_ball <- function(ball) {
+update_ball <- function(ball, field) {
   if (!is_ball_offscreen(ball) && ball$speed != 0) {
+    ball$texture_angle <- ball$texture_angle + 1
+    if (ball$texture_angle > 360) {
+      ball$texture_angle <- 0
+    }
     ball$x <- ball$x + ball$speed * cos(deg2rad(ball$direction_angle))
     ball$y <- ball$y + ball$speed * sin(deg2rad(ball$direction_angle))
     ball$z <- -ball$force * ball$i^2 + 2 * ball$i + 1
     ball$i <- ball$i + 0.01
     if (ball$z < 1) {
-      if (!ball$bounced_once){
+      if (!ball$bounced_once) {
+        tile_x <- ((ball$x-field$offset_x) %/% 32)
+        tile_y <- ((ball$y-field$offset_y) %/% 32)
+        if (is_in_bounds(field$grid_list, tile_x, tile_y) && !field$grid_list[[tile_x, tile_y]]$revealed) {
+          if (field$grid_list[[tile_x, tile_y]]$is_mine) {
+            # TODO: set game over
+            for (x in 1:ncol(field$grid_list)) {
+              for (y in 1:nrow(field$grid_list)) {
+                if (field$grid_list[[x, y]]$is_mine) {
+                  field$grid_list[[x, y]]$revealed <- TRUE
+                }
+              }
+            }
+          } else {
+            field <- check_cell(field, tile_x, tile_y)
+          }
+        }
         ball$bounced_once <- TRUE
         ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y, ball$speed)
       } else {
@@ -107,12 +127,12 @@ update_ball <- function(ball) {
     ball$movement_points <- array(list(list(x = 300.0, y=10.0)))
     ball$speed <- 0.0
   }
-  return(ball)
+  return(list(b=ball, f=field))
 }
 
 draw_ball <- function(ball) {
   #draw_circle_v(c(ball$x+3, ball$y+3), 3.0, "black")
-  draw_texture_ex(ball$texture, c(ball$x, ball$y), 0.0, ball$z, "white")
+  draw_texture_ex(ball$texture, c(ball$x, ball$y), ball$texture_angle, ball$z, "white")
   if (ball$speed != 0) {
     # Simplifying the quadratic formula taking: a = -ball$force, b = 2, c = 0 (see equation for ball$z)
     # c is not 1 because we want to check when the parabola is at y = 1 (the original scale of the ball)

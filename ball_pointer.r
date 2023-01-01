@@ -3,10 +3,10 @@
 init_ball_pointer <- function() {
   return(
     list(
-      center = c(160+160+5, 35+160+5),
-      position = c(160+160+5, 35+160+5),
+      center = c(182+112+32, 60+112+32),
+      position = c(182+112+32, 60+112+32),
       movement = 1,
-      lerp_movemet = 0.008
+      lerp_movemet = 0.009
     )
   )
 }

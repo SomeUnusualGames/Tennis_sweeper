@@ -28,7 +28,9 @@ update_game <- function(game) {
   game$ball_pointer <- update_ball_pointer(game$ball_pointer)
 
   if (game$ball$speed != 0) {
-    game$ball <- update_ball(game$ball)
+    updated_vars <- update_ball(game$ball, game$field)
+    game$ball <- updated_vars$b
+    game$field <- updated_vars$f
   }
 
   game$machine <- update_ball_machine(game$machine)
