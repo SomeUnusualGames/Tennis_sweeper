@@ -9,6 +9,7 @@ source("player.r")
 init_game <- function(width, height, title) {
   init_window(width, height, title)
   set_target_fps(60)
+  init_audio_device()
   return(
     list(
       field   = init_field(),

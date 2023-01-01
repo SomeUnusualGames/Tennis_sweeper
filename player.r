@@ -10,6 +10,10 @@ init_player <- function() {
   player <- list(
     animation = init_animation("assets/graphics/rumi.png"),
     position = c(175, 600),
+    hit_ball_sounds = list(
+      load_sound("assets/sfx/tennis-forehand.wav"),
+      load_sound("assets/sfx/tennis-forehand2.wav")
+    ),
     speed = 220, can_move = TRUE, ball_state = BALL_STATE$NONE
   )
   player$animation <- load_animation(
@@ -133,6 +137,7 @@ update_player <- function(state, player, ball, b_pointer) {
       player$animation$paused <- FALSE
       player$ball_state <- BALL_STATE$NONE
       ball$movement_points <- array(list(list(x = ball$x, y=ball$y)))
+      play_sound(sample(player$hit_ball_sounds, 1)[[1]])
       ball <- shoot_ball_to(
         ball, -10.0, ball$x, ball$y,
         b_pointer$position[1], b_pointer$position[2]
@@ -160,4 +165,6 @@ draw_player <- function(state, player) {
 
 unload_player <- function(player) {
   unload_texture(player$animation$texture)
+  unload_sound(player$hit_ball_sounds[[1]])
+  unload_sound(player$hit_ball_sounds[[2]])
 }

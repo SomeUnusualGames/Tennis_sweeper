@@ -14,4 +14,5 @@ while (!window_should_close()) {
 }
 
 unload_game(game)
+close_audio_device()
 close_window()

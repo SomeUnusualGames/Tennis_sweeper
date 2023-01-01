@@ -35,13 +35,13 @@ get_tiles <- function(grid_list, tile_x, tile_y, check_mines) {
   return(if (check_mines) length(tiles) else tiles)
 }
 
-init_grid <- function(grid_list) {
+init_grid <- function(grid_list, tile_x, tile_y) {
   # Put the mines at random positions
   mine_num <- 7
   while (mine_num > 0) {
     x <- rand(1, 8, TRUE)
     y <- rand(1, 8, TRUE)
-    if (!grid_list[[x, y]]$is_mine) {
+    if (!grid_list[[x, y]]$is_mine && x != tile_x && y != tile_y) {
       grid_list[[x, y]]$is_mine <- TRUE
       mine_num <- mine_num - 1
     }
@@ -68,6 +68,7 @@ init_field <- function() {
         has_flag = FALSE, num = 0
       )), nrow=7, ncol=7
     ),
+    mines_set = FALSE,
     num_color = c("blue", "darkgreen", "yellow", "purple", "red", "maroon", "orange", "gray"),
     victory = FALSE,
     width = 7, height = 7,
@@ -78,7 +79,7 @@ init_field <- function() {
       field$grid_list[[x, y]]$rect <- rectangle(field$offset_x+(x*32), field$offset_y+(y*32), 32, 32)
     }
   }
-  field$grid_list <- init_grid(field$grid_list)
+  #field$grid_list <- init_grid(field$grid_list)
   return(field)
 }
 

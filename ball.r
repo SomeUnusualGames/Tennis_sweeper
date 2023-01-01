@@ -9,7 +9,8 @@ init_ball <- function() {
       direction_angle = 0.0, force = 0.0,
       texture_angle = 0.0, speed = 0.0, i = 0.0,
       bounced_once = FALSE, bounced_twice = FALSE,
-      movement_points = array(list(list(x = 300.0, y=10.0)))
+      movement_points = array(list(list(x = 300.0, y=10.0))),
+      bounce_sound = load_sound("assets/sfx/tennis-bounce-ball.wav")
     )
   )
 }
@@ -101,6 +102,10 @@ update_ball <- function(ball, field) {
       if (!ball$bounced_once) {
         tile_x <- ((ball$x-field$offset_x) %/% 32)
         tile_y <- ((ball$y-field$offset_y) %/% 32)
+        if (!field$mines_set) {
+          field$grid_list <- init_grid(field$grid_list, tile_x, tile_y)
+          field$mines_set <- TRUE
+        }
         if (is_in_bounds(field$grid_list, tile_x, tile_y) && !field$grid_list[[tile_x, tile_y]]$revealed) {
           if (field$grid_list[[tile_x, tile_y]]$is_mine) {
             # TODO: set game over
@@ -115,9 +120,11 @@ update_ball <- function(ball, field) {
             field <- check_cell(field, tile_x, tile_y)
           }
         }
+        play_sound(ball$bounce_sound)
         ball$bounced_once <- TRUE
         ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y, ball$speed)
       } else {
+        play_sound(ball$bounce_sound)
         ball <- shoot_ball(ball, ball$direction_angle, ball$force*2, ball$x, ball$y, ball$speed)
         ball$bounced_twice <- TRUE
       }
@@ -156,4 +163,5 @@ draw_ball <- function(ball) {
 
 unload_ball <- function(ball) {
   unload_texture(ball$texture)
+  unload_sound(ball$bounce_sound)
 }

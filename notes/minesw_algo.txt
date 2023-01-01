@@ -1,0 +1,19 @@
+Tile touched
+If not revealed {
+  if has mine and is the tile clicked -> gameover
+  revealed = true
+  if num == 0 {
+    valid_tiles = get_valid_tiles() // inside grid, has no flag, was not revealed
+    for tile in valid_tiles {
+      recurse_tile_check(tile)
+    }
+  } else {
+    victory = true
+    for tile in grid {  // check victory -> all non mine tiles must be opened
+      if (tile.num > 0 and !tile.revealed) {
+        victory = false
+        break
+      }
+    }
+  } 
+}
