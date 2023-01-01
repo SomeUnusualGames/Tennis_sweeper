@@ -103,7 +103,7 @@ update_ball <- function(ball, field) {
       if (!ball$bounced_once) {
         tile_x <- ((ball$x-field$offset_x) %/% 32)
         tile_y <- ((ball$y-field$offset_y) %/% 32)
-        if (!field$mines_set) {
+        if (!field$mines_set && is_in_bounds(field$grid_list, tile_x, tile_y)) {
           field$grid_list <- init_grid(field$grid_list, tile_x, tile_y)
           field$mines_set <- TRUE
         }
@@ -114,7 +114,7 @@ update_ball <- function(ball, field) {
             # TODO: set game over
             for (x in 1:ncol(field$grid_list)) {
               for (y in 1:nrow(field$grid_list)) {
-                if (field$grid_list[[x, y]]$is_mine) {
+                if (field$grid_list[[x, y]]$is_mine && !field$grid_list[[x, y]]$has_flag) {
                   field$grid_list[[x, y]]$revealed <- TRUE
                 }
               }
