@@ -9,6 +9,7 @@ init_ball <- function() {
       direction_angle = 0.0, force = 0.0,
       texture_angle = 0.0, speed = 0.0, i = 0.0,
       bounced_once = FALSE, bounced_twice = FALSE,
+      set_flag = FALSE,
       movement_points = array(list(list(x = 300.0, y=10.0))),
       bounce_sound = load_sound("assets/sfx/tennis-bounce-ball.wav")
     )
@@ -107,7 +108,9 @@ update_ball <- function(ball, field) {
           field$mines_set <- TRUE
         }
         if (is_in_bounds(field$grid_list, tile_x, tile_y) && !field$grid_list[[tile_x, tile_y]]$revealed) {
-          if (field$grid_list[[tile_x, tile_y]]$is_mine) {
+          if (ball$set_flag) {
+            field$grid_list[[tile_x, tile_y]]$has_flag <- !field$grid_list[[tile_x, tile_y]]$has_flag
+          } else if (field$grid_list[[tile_x, tile_y]]$is_mine && !field$grid_list[[tile_x, tile_y]]$has_flag) {
             # TODO: set game over
             for (x in 1:ncol(field$grid_list)) {
               for (y in 1:nrow(field$grid_list)) {
@@ -116,7 +119,7 @@ update_ball <- function(ball, field) {
                 }
               }
             }
-          } else {
+          } else if (!field$grid_list[[tile_x, tile_y]]$has_flag) {
             field <- check_cell(field, tile_x, tile_y)
           }
         }
@@ -139,7 +142,7 @@ update_ball <- function(ball, field) {
 
 draw_ball <- function(ball) {
   #draw_circle_v(c(ball$x+3, ball$y+3), 3.0, "black")
-  draw_texture_ex(ball$texture, c(ball$x, ball$y), ball$texture_angle, ball$z, "white")
+  draw_texture_ex(ball$texture, c(ball$x, ball$y), ball$texture_angle, ball$z, ifelse(ball$set_flag, "orange", "white"))
   if (ball$speed != 0) {
     # Simplifying the quadratic formula taking: a = -ball$force, b = 2, c = 0 (see equation for ball$z)
     # c is not 1 because we want to check when the parabola is at y = 1 (the original scale of the ball)

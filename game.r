@@ -28,6 +28,9 @@ update_game <- function(game) {
 
   game$ball_pointer <- update_ball_pointer(game$ball_pointer)
 
+  if (is_key_pressed(key$q)) {
+    game$ball$set_flag <- !game$ball$set_flag
+  }
   if (game$ball$speed != 0) {
     updated_vars <- update_ball(game$ball, game$field)
     game$ball <- updated_vars$b

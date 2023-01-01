@@ -122,6 +122,9 @@ draw_field <- function(field) {
         }
       } else {
         draw_rectangle_rec(tile$rect, "darkgray")
+        if (tile$has_flag) {
+          draw_text("F", tile$rect$x+8, tile$rect$y+2, 30, "orange")
+        }
       }
     }
   }
