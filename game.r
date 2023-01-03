@@ -16,12 +16,20 @@ init_game <- function(width, height, title) {
       player  = init_player(),
       ball    = init_ball(),
       machine = init_ball_machine(),
-      ball_pointer = init_ball_pointer()
+      ball_pointer = init_ball_pointer(),
+      game_over_timer = 0.0,
+      show_fps = FALSE,
+      played_victory_sound = FALSE,
+      cheer_sound = load_sound("assets/sfx/cheering-and-clapping-crowd-1.wav")
     )
   )
 }
 
 update_game <- function(game) {
+  if (is_key_pressed(key$k)) {
+    game$show_fps <- !game$show_fps
+  }  
+
   updated_vars <- update_player(game$state, game$player, game$ball, game$ball_pointer)
   game$player <- updated_vars$p
   game$ball <- updated_vars$b
@@ -31,10 +39,26 @@ update_game <- function(game) {
   if (is_key_pressed(key$q)) {
     game$ball$set_flag <- !game$ball$set_flag
   }
+
+  if (game$field$victory) {
+    game$machine$can_shoot <- FALSE
+    if (!game$played_victory_sound) {
+      game$played_victory_sound <- TRUE
+      play_sound(game$cheer_sound)
+    }
+  }
+
   if (game$ball$speed != 0) {
     updated_vars <- update_ball(game$ball, game$field)
     game$ball <- updated_vars$b
     game$field <- updated_vars$f
+  }
+
+  if (game$ball$game_over && game$machine$can_shoot) {
+    game$game_over_timer <- 1.2
+    game$player$can_move <- FALSE
+    game$machine$can_shoot <- FALSE
+    game$ball_pointer$can_move <- FALSE
   }
 
   game$machine <- update_ball_machine(game$machine)
@@ -63,6 +87,10 @@ draw_game <- function(game) {
   game$ball <- draw_ball(game$ball)
   draw_ball_machine(game$machine)
   draw_ball_pointer(game$ball_pointer)
+  if (game$field$victory) {
+    draw_text("YOU WON!", 130, 380, 60, "black")
+    draw_text("Press ESC to quit", 130, 450, 40, "black")
+  }
   #if (length(game$ball$movement_points) > 1) {
   #  points <- game$ball$movement_points
   #  draw_line_v(
@@ -84,4 +112,5 @@ unload_game <- function(game) {
   unload_player(game$player)
   unload_ball(game$ball)
   unload_ball_machine(game$machine)
+  unload_sound(game$cheer_sound)
 }

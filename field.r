@@ -1,7 +1,7 @@
 print_grid <- function(grid_list) {
   s <- ""
-  for (x in 1:ncol(grid_list)) {
-    for (y in 1:nrow(grid_list)) {
+  for (y in 1:nrow(grid_list)) {
+    for (x in 1:ncol(grid_list)) {
       if (grid_list[[x, y]]$is_mine) {
         s <- paste(s, "*")
       } else {
@@ -56,6 +56,19 @@ init_grid <- function(grid_list, tile_x, tile_y) {
   }
   #print_grid(grid_list)
   return(grid_list)
+}
+
+reset_field <- function(field) {
+  field$mines_set <- FALSE
+  for (x in 1:field$width) {
+    for (y in 1:field$height) {
+      field$grid_list[[x, y]]$revealed <- FALSE
+      field$grid_list[[x, y]]$is_mine <- FALSE
+      field$grid_list[[x, y]]$has_flag <- FALSE
+      field$grid_list[[x, y]]$num <- 0
+    }
+  }
+  return(field)
 }
 
 init_field <- function() {

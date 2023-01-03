@@ -97,7 +97,7 @@ player_is_hitting <- function(curr_id) {
 update_player <- function(state, player, ball, b_pointer) {
   player$animation <- update_animation(player$animation)
 
-  if (!player_is_hitting(player$animation$current_id)) {
+  if (!player_is_hitting(player$animation$current_id) && !ball$game_over) {
     player$can_move <- TRUE
   }
 
@@ -116,7 +116,7 @@ update_player <- function(state, player, ball, b_pointer) {
         )
         if (dist < 100 && ball$z > 1.1) {
           player$animation <- set_animation(player$animation, ANIMATION_ID$HIGHBALL)
-        } else if (angle >= 0) {
+        } else if (angle < 90) {
           player$animation <- set_animation(player$animation, ANIMATION_ID$HIT)
         } else {
           player$animation <- set_animation(player$animation, ANIMATION_ID$HIT_REV)
@@ -145,7 +145,7 @@ update_player <- function(state, player, ball, b_pointer) {
     }
   }
 
-  if (is_ball_offscreen(ball) && player$ball_state == BALL_STATE$WAIT_BALL) {
+  if (is_ball_offscreen(ball) && player$ball_state == BALL_STATE$WAIT_BALL && !ball$game_over) {
     player$ball_state = BALL_STATE$NONE
     player$can_move <- TRUE
     player$animation$paused <- FALSE
@@ -161,6 +161,13 @@ update_player <- function(state, player, ball, b_pointer) {
 draw_player <- function(state, player) {
   draw_animation(player$animation, player$position[1], player$position[2], 2.5, 0.0, "white")
   #draw_rectangle_rec(rectangle(player$position["x"], player$position["y"], 60, 60), "white")
+}
+
+reset_player <- function(player) {
+  player$can_move <- TRUE
+  player$ball_state <- BALL_STATE$NONE
+  player$position <- c(175, 600)
+  return(player)
 }
 
 unload_player <- function(player) {

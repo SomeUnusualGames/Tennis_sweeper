@@ -6,12 +6,16 @@ init_ball_pointer <- function() {
       center = c(182+112+32, 60+112+32),
       position = c(182+112+32, 60+112+32),
       movement = 1,
-      lerp_movemet = 0.009
+      lerp_movemet = 0.009,
+      can_move = TRUE
     )
   )
 }
 
 update_ball_pointer <- function(b_pointer) {
+  if (!b_pointer$can_move) {
+    return(b_pointer)
+  }
   if (is_key_down(key$up)) {
     b_pointer$position[2] <- b_pointer$position[2] - b_pointer$movement
   } else if (is_key_down(key$down)) {
@@ -35,4 +39,10 @@ update_ball_pointer <- function(b_pointer) {
 
 draw_ball_pointer <- function(b_pointer) {
   draw_circle_v(b_pointer$position, 5.0, "red")
+}
+
+reset_pointer <- function(b_pointer) {
+  b_pointer$position <- b_pointer$center
+  b_pointer$can_move <- TRUE
+  return(b_pointer)
 }

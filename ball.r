@@ -9,7 +9,8 @@ init_ball <- function() {
       direction_angle = 0.0, force = 0.0,
       texture_angle = 0.0, speed = 0.0, i = 0.0,
       bounced_once = FALSE, bounced_twice = FALSE,
-      set_flag = FALSE,
+      set_flag = FALSE, game_over = FALSE,
+      explosion = load_sound("assets/sfx/beep_gut_rip.wav"),
       movement_points = array(list(list(x = 300.0, y=10.0))),
       bounce_sound = load_sound("assets/sfx/tennis-bounce-ball.wav")
     )
@@ -111,7 +112,8 @@ update_ball <- function(ball, field) {
           if (ball$set_flag) {
             field$grid_list[[tile_x, tile_y]]$has_flag <- !field$grid_list[[tile_x, tile_y]]$has_flag
           } else if (field$grid_list[[tile_x, tile_y]]$is_mine && !field$grid_list[[tile_x, tile_y]]$has_flag) {
-            # TODO: set game over
+            ball$game_over <- TRUE
+            play_sound(ball$explosion)
             for (x in 1:ncol(field$grid_list)) {
               for (y in 1:nrow(field$grid_list)) {
                 if (field$grid_list[[x, y]]$is_mine && !field$grid_list[[x, y]]$has_flag) {
@@ -167,4 +169,5 @@ draw_ball <- function(ball) {
 unload_ball <- function(ball) {
   unload_texture(ball$texture)
   unload_sound(ball$bounce_sound)
+  unload_sound(ball$explosion)
 }

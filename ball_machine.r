@@ -11,12 +11,16 @@ init_ball_machine <- function() {
       current_angle = 180.0,
       ball_angle = 0.0,
       shoot_timer = 3.0,
-      state = MACHINE_STATE$WAIT_TIMER
+      state = MACHINE_STATE$WAIT_TIMER,
+      can_shoot = TRUE
     )
   )
 }
 
 update_ball_machine <- function(machine) {
+  if (!machine$can_shoot) {
+    return(machine)
+  }
   if (machine$state == MACHINE_STATE$WAIT_TIMER) {
     machine$shoot_timer <- machine$shoot_timer - get_frame_time()
     if (machine$shoot_timer <= 0) {
@@ -45,6 +49,15 @@ draw_ball_machine <- function(machine) {
     rectangle(56, 0, 24, 20), rectangle(305, 57, 25, 20),
     c(12.5, 10), machine$current_angle, "white"
   )
+}
+
+reset_ball_machine <- function(machine) {
+  machine$angle <- 180.0
+  machine$current_angle <- 180.0
+  machine$shoot_timer <- 3.0
+  machine$state <- MACHINE_STATE$WAIT_TIMER
+  machine$can_shoot <- TRUE
+  return(machine)
 }
 
 unload_ball_machine <- function(machine) {
