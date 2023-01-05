@@ -6,12 +6,12 @@ The scale is the "z" position, represented as the scale of the ball when drawing
 It starts at 1 because that's the original scale of the texture.
 
 The idea is to check when the "z" position gets to 1 after being shot (see the graphic), in which case the ball bounced:
-When z = 1, we can calculate the x value (ball$i) with the quadratic formula, and since the number of steps that the parabola moves is fixed (0.01), we can calculate how many iterations (of the movement of the ball) it would take the ball to bounce:
+When z = 1, we can calculate the x value (ball$i), and since the number of steps that the parabola moves is fixed (0.01), we can calculate how many iterations (of the movement of the ball) it would take the ball to bounce:
 
 -force*x^2 + 2*x + 1 = 1
 -force*x^2 + 2*x = 0
 force = 2*x -> x = 2 / force
-parabola_at_one = (2 / force) -> This is the quadratic formula simplified when z = 1
+parabola_at_one = (2 / force) -> This is the parabola when z = 1
 num_iterations = ceil(parabola_at_one / 0.01) + 1
 
 We need to know that number to calculate where the ball is going to bounce given the "force" of the parabola. We can do this because the movement of the ball is fixed:
