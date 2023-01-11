@@ -15,6 +15,7 @@ while (!window_should_close()) {
     game$field <- reset_field(game$field)
     game$ball$game_over <- FALSE
     game$game_over_timer <- 0.0
+    play_music_stream(game$music_game)
   }
   game <- update_game(game)
 

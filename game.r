@@ -10,22 +10,25 @@ init_game <- function(width, height, title) {
   init_window(width, height, title)
   set_target_fps(60)
   init_audio_device()
-  return(
-    list(
-      field   = init_field(),
-      player  = init_player(),
-      ball    = init_ball(),
-      machine = init_ball_machine(),
-      ball_pointer = init_ball_pointer(),
-      game_over_timer = 0.0,
-      show_fps = FALSE,
-      played_victory_sound = FALSE,
-      cheer_sound = load_sound("assets/sfx/cheering-and-clapping-crowd-1.wav")
-    )
+  game <- list(
+    field   = init_field(),
+    player  = init_player(),
+    ball    = init_ball(),
+    machine = init_ball_machine(),
+    ball_pointer = init_ball_pointer(),
+    game_over_timer = 0.0,
+    show_fps = FALSE,
+    played_victory_sound = FALSE,
+    cheer_sound = load_sound("assets/sfx/cheering-and-clapping-crowd-1.wav"),
+    music_game = load_music_stream("assets/music/dark-beat-synth.wav")
   )
+  set_music_volume(game$music, 0.15)
+  play_music_stream(game$music)
+  return(game)
 }
 
 update_game <- function(game) {
+  update_music_stream(game$music_game)
   if (is_key_pressed(key$k)) {
     game$show_fps <- !game$show_fps
   }  
@@ -42,6 +45,7 @@ update_game <- function(game) {
 
   if (game$field$victory) {
     game$machine$can_shoot <- FALSE
+    stop_music_stream(game$music_game)
     if (!game$played_victory_sound) {
       game$played_victory_sound <- TRUE
       play_sound(game$cheer_sound)
@@ -59,6 +63,7 @@ update_game <- function(game) {
     game$player$can_move <- FALSE
     game$machine$can_shoot <- FALSE
     game$ball_pointer$can_move <- FALSE
+    stop_music_stream(game$music_game)
   }
 
   game$machine <- update_ball_machine(game$machine)
@@ -108,6 +113,7 @@ draw_game <- function(game) {
 }
 
 unload_game <- function(game) {
+  unload_music_stream(game$music_game)
   unload_field(game$field)
   unload_player(game$player)
   unload_ball(game$ball)

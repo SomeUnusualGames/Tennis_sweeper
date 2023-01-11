@@ -47,6 +47,7 @@ shoot_ball_to <- function(ball, speed, initial_x, initial_y, target_x, target_y)
     }
   }
   # Same formula as in shoot_ball but switching the variables
+  # 
   ball$force <- 2 / parabola_end
   return(ball)
 }
