@@ -147,8 +147,7 @@ draw_ball <- function(ball) {
   #draw_circle_v(c(ball$x+3, ball$y+3), 3.0, "black")
   draw_texture_ex(ball$texture, c(ball$x, ball$y), ball$texture_angle, ball$z, ifelse(ball$set_flag, "orange", "white"))
   if (ball$speed != 0) {
-    # Simplifying the quadratic formula taking: a = -ball$force, b = 2, c = 0 (see equation for ball$z)
-    # c is not 1 because we want to check when the parabola is at y = 1 (the original scale of the ball)
+    # Get the x position when the parabola is at 1: -force*x^2 + 2*x + 1 = 1 -> x = 2 / force
     parabola_end <- 2 / ball$force
     # I want to know how many steps it takes the ball to get to that value
     # The x value of the parabola moves every 0.01 steps

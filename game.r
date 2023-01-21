@@ -31,7 +31,7 @@ update_game <- function(game) {
   update_music_stream(game$music_game)
   if (is_key_pressed(key$k)) {
     game$show_fps <- !game$show_fps
-  }  
+  }
 
   updated_vars <- update_player(game$state, game$player, game$ball, game$ball_pointer)
   game$player <- updated_vars$p
